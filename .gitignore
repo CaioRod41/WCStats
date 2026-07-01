@@ -1,0 +1,40 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors and OS files
+.vscode/
+.vs/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data and generated artifacts
+data/*.csv
+data/*.xlsx
+data/*.parquet
+tmp/
+logs/
+
+# Scraping/debug outputs
+*.log
+output.txt
+fifa_debug.txt
+fifa_ranking.html
+transfermarkt.html
+
+# Power BI local backups and extracted internals
+*.backup.pbix
+*.bak

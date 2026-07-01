@@ -1,0 +1,100 @@
+services:
+  postgres-airflow:
+    image: postgres:13
+    container_name: wcstats_airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+
+  airflow-init:
+    image: apache/airflow:2.9.3
+    depends_on:
+      - postgres-airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__WEBSERVER__SECRET_KEY: wcstats_secret_key_123
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: ${AIRFLOW_DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-wcstats}
+      PGCLIENTENCODING: UTF8
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    command:
+      - bash
+      - -c
+      - |
+        pip install -r /opt/airflow/project/requirements.txt
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Caio \
+          --lastname Rodrigues \
+          --role Admin \
+          --email admin@example.com || true
+
+  airflow-webserver:
+    image: apache/airflow:2.9.3
+    container_name: wcstats_airflow_webserver
+    depends_on:
+      - postgres-airflow
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__WEBSERVER__SECRET_KEY: wcstats_secret_key_123
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: ${AIRFLOW_DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-wcstats}
+      PGCLIENTENCODING: UTF8
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    command:
+      - bash
+      - -c
+      - |
+        pip install -r /opt/airflow/project/requirements.txt
+        airflow webserver
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    container_name: wcstats_airflow_scheduler
+    depends_on:
+      - postgres-airflow
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__WEBSERVER__SECRET_KEY: wcstats_secret_key_123
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: ${AIRFLOW_DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-wcstats}
+      PGCLIENTENCODING: UTF8
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    command:
+      - bash
+      - -c
+      - |
+        pip install -r /opt/airflow/project/requirements.txt
+        airflow scheduler
+
+volumes:
+  airflow_postgres_data:
