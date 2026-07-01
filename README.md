@@ -2,7 +2,7 @@
 
 Pipeline de dados e dashboard analitico para acompanhar jogos da Copa do Mundo FIFA 2026. O projeto extrai dados publicos, organiza tudo em PostgreSQL, calcula indicadores de forca das equipes, gera previsoes de partidas e entrega views prontas para consumo no Power BI.
 
-![Dashboard de proximos jogos](PXE.png)
+![Dashboard de proximos jogos](assets/readme/PXE.png)
 
 ## Visao Geral
 
@@ -57,9 +57,9 @@ Camadas do banco:
 
 O projeto possui fluxos separados para referencias, atualizacao diaria e experimentos.
 
-![Pipeline diario](Extract1_linkedin.png)
+![Pipeline diario](assets/readme/Extract1_linkedin.png)
 
-![Pipeline de referencia](Extract2_linkedin.png)
+![Pipeline de referencia](assets/readme/Extract2_linkedin.png)
 
 DAGs principais:
 
@@ -144,11 +144,11 @@ O script `src/05_experiments/create_prediction_model_lab.py` cria uma camada sep
 
 Exemplo dos pesos do baseline:
 
-![Pesos do modelo](Pesos_Modelo_linkedin.png)
+![Pesos do modelo](assets/readme/Pesos_Modelo_linkedin.png)
 
 Exemplo de resultado de avaliacao:
 
-![Resultados do baseline](Results_Biseline_linkedin.png)
+![Resultados do baseline](assets/readme/Results_Biseline_linkedin.png)
 
 Ele gera:
 
