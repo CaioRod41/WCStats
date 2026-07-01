@@ -1,19 +1,19 @@
 # WCStats
 
-Pipeline de dados e dashboard analitico para acompanhar a Copa do Mundo FIFA 2026. O projeto extrai dados publicos, organiza tudo em PostgreSQL, calcula indicadores de forca das selecoes, gera previsoes de partidas e entrega views prontas para consumo no Power BI.
+Pipeline de dados e dashboard analitico para acompanhar jogos da Copa do Mundo FIFA 2026. O projeto extrai dados publicos, organiza tudo em PostgreSQL, calcula indicadores de forca das equipes, gera previsoes de partidas e entrega views prontas para consumo no Power BI.
 
-![Mockup grupos](mockups/mockup_grupos.png)
+![Dashboard de proximos jogos](PXE.png)
 
 ## Visao Geral
 
-O WCStats foi criado para centralizar informacoes de selecoes, jogos, rankings, valor de mercado, historico recente, indicadores socioeconomicos e contexto ambiental em uma base unica. A partir dessa base, o projeto calcula probabilidades de resultado, placares provaveis, gols esperados, standings de grupos e rankings de forca.
+O WCStats centraliza informacoes de jogos, rankings, valor de mercado, historico recente, indicadores socioeconomicos e contexto ambiental em uma base unica. A partir dessa base, o projeto calcula probabilidades de resultado, placares provaveis, gols esperados e standings de grupos.
 
 Principais entregas:
 
 - Pipeline ELT em Python, PostgreSQL e Apache Airflow.
 - Camadas de dados em `raw`, `staging`, `mart` e `experiments`.
-- Views finais para dashboards de proximos jogos, probabilidades e ranking de selecoes.
-- Arquivos Power BI (`.pbix`) para visualizacao interativa.
+- Views finais para o dashboard de proximos jogos e probabilidades.
+- Arquivo Power BI (`WCStats.pbix`) para visualizacao interativa.
 - Laboratorio de modelos para comparar pesos e estrategias de previsao.
 
 ## Stack
@@ -53,6 +53,26 @@ Camadas do banco:
 - `mart`: tabelas finais de analise, features, rankings e previsoes.
 - `experiments`: camada isolada para backtests e comparacao de modelos.
 
+## Pipelines no Airflow
+
+O projeto possui fluxos separados para referencias, atualizacao diaria e experimentos.
+
+![Pipeline diario](Extract1_linkedin.png)
+
+![Pipeline de referencia](Extract2_linkedin.png)
+
+DAGs principais:
+
+- `wcstats_reference_pipeline`: carga manual de dados pesados ou quase estaticos, como participantes, ranking FIFA, HDI, World Bank, valor de mercado e dados ambientais.
+- `wcstats_pipeline`: pipeline diaria para atualizar jogos, recalcular forca das equipes, previsoes, probabilidades, standings e views finais.
+- `wcstats_experiments_pipeline`: pipeline manual para backtests e comparacao de modelos no schema `experiments`.
+
+Ordem recomendada:
+
+1. Execute `wcstats_reference_pipeline` uma vez para preparar as tabelas de referencia.
+2. Execute ou ative `wcstats_pipeline` para manter os dados atualizados.
+3. Execute `wcstats_experiments_pipeline` quando quiser estudar novos pesos e modelos.
+
 ## Estrutura do Projeto
 
 ```text
@@ -68,7 +88,6 @@ WCStats/
     05_experiments/
     config.py
     check_reference_tables.py
-  mockups/
   docker-compose.yml
   requirements.txt
   .env.example
@@ -87,28 +106,14 @@ O projeto combina diferentes fontes publicas:
 - Open-Meteo
 - Ranking FIFA via scraping
 
-## DAGs do Airflow
+## Views Para o Power BI
 
-O projeto possui tres fluxos principais:
-
-- `wcstats_reference_pipeline`: carga manual de dados pesados ou quase estaticos, como selecoes, ranking FIFA, HDI, World Bank, valor de mercado e dados ambientais.
-- `wcstats_pipeline`: pipeline diaria para atualizar jogos, recalcular forca das equipes, previsoes, probabilidades, standings e views finais.
-- `wcstats_experiments_pipeline`: pipeline manual para backtests e comparacao de modelos no schema `experiments`.
-
-Ordem recomendada:
-
-1. Execute `wcstats_reference_pipeline` uma vez para preparar as tabelas de referencia.
-2. Execute ou ative `wcstats_pipeline` para manter os dados atualizados.
-3. Execute `wcstats_experiments_pipeline` quando quiser estudar novos pesos e modelos.
-
-## Views Para Dashboard
-
-As principais views consumidas pelo Power BI sao:
+As principais views consumidas pelo dashboard sao:
 
 - `mart.vw_match_center`: base principal do painel de proximos jogos.
 - `mart.vw_next_match`: proximas partidas selecionaveis para cards.
 - `mart.vw_next_match_score_probabilities`: probabilidades de placares para os proximos jogos.
-- `mart.vw_team_power_ranking`: ranking analitico das selecoes, com score de forca, Elo, ranking FIFA, valor de mercado, indicadores socioeconomicos e perfil ambiental.
+- `mart.vw_team_power_ranking`: ranking analitico disponivel no mart, usado como base de forca das equipes.
 
 ## Modelo de Previsao
 
@@ -117,7 +122,7 @@ O modelo principal combina sinais de:
 - Ranking FIFA
 - Elo
 - desempenho recente
-- historico das selecoes
+- historico das equipes
 - valor de mercado
 - perfil de gols
 - indicadores socioeconomicos
@@ -136,6 +141,14 @@ As previsoes geradas incluem:
 ## Laboratorio de Modelos
 
 O script `src/05_experiments/create_prediction_model_lab.py` cria uma camada separada para avaliar modelos sem alterar o pipeline oficial.
+
+Exemplo dos pesos do baseline:
+
+![Pesos do modelo](Pesos_Modelo_linkedin.png)
+
+Exemplo de resultado de avaliacao:
+
+![Resultados do baseline](Results_Biseline_linkedin.png)
 
 Ele gera:
 
@@ -226,15 +239,7 @@ O arquivo principal do Power BI e:
 WCStats.pbix
 ```
 
-Tambem ha uma versao focada em selecoes:
-
-```text
-WCStats.selecoes.pbix
-```
-
-Exemplo visual:
-
-![Mockup selecoes](mockups/mockup_selecoes.png)
+O dashboard atual e focado em proximos jogos, probabilidades, placares provaveis e totais de gols. A pagina dedicada a selecoes/ranking ainda nao faz parte desta versao publica do projeto.
 
 ## Observacoes de Uso
 
